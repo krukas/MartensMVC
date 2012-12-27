@@ -401,7 +401,7 @@ class upload {
      * @return	void
      */
     public function setMaximumFileSize($size) {
-        if (is_int($size)) {
+        if (is_numeric($size)) {
             $this->maximumFileSize = (int) ($size * 1000);
         } else {
             throw new Exception("No int given when int expected in setMaximumFileSize!");
@@ -474,7 +474,7 @@ class upload {
      * @return	void
      */
     public function setMaximumWidth($width) {
-        if (is_int($width)) {
+        if (is_numeric($width)) {
             $this->maximumWidth = $width;
         } else {
             throw new Exception("No int given when int expected in setMaximumWidth!");
@@ -492,7 +492,7 @@ class upload {
      * @return	void
      */
     public function setMaximumHeight($height) {
-        if (is_int($height)) {
+        if (is_numeric($height)) {
             $this->maximumHeight = $height;
         } else {
             throw new Exception("No int given when int expected in setMaximumHeight!");

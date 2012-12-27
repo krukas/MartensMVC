@@ -176,7 +176,7 @@ class paginate {
      * @return	boolean
      */
     function setItemsTotal($total) {
-        if(is_int($total) && $total > 0){
+        if(is_numeric($total) && $total > 0){
             $this->itemsTotal = $total;
             return true;
         }
@@ -193,7 +193,7 @@ class paginate {
      * @return	boolean
      */
     function setItemsPerPage($items){
-        if(is_int($items) && $items > 0){
+        if(is_numeric($items) && $items > 0){
             $this->itemsPerPage = $items;
             return true;
         }
@@ -210,7 +210,7 @@ class paginate {
      * @return	boolean
      */
     function setCurrentPage($currenPage) {
-        if(is_int($currenPage) && $currenPage > 0) {
+        if(is_numeric($currenPage) && $currenPage > 0) {
             $this->currentPage = $currenPage;
             return true;
         }
