@@ -126,6 +126,16 @@ if (!function_exists('baseUrl')) {
     
 }
 
+
+/**
+ * randomString
+ *
+ * Generate an random string.
+ *
+ * @access  public
+ * @param   int     length of the string
+ * @return  String
+ */
 if(!function_exists('randomString')){
     function randomString($length) {
         $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -135,6 +145,25 @@ if(!function_exists('randomString')){
             $str .= $chars[rand(0, $size - 1)];
         }
         return $str;
+    }
+}
+
+
+/**
+ * redirect
+ *
+ * Redirect to controller/function or an url.
+ *
+ * @access  public
+ * @param   string  url
+ * @return  void
+ */
+if ( ! function_exists('redirect')) {
+    function redirect($url = '') {
+        if (!preg_match('#^https?://#i', $url)) {
+            $url = baseUrl($url);
+        }
+        header("Location: ".$url, TRUE);
     }
 }
 
