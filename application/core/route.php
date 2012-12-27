@@ -113,14 +113,18 @@ class route {
             /* Run action */
             $controller->$action();
         } catch(Exception $e){
-            /* Displays Exception in html DIV */
-            $trace = $e->getTrace();
-            $message = $e->getMessage();
-            $filepath = $trace[0]['file'];
-            $line = $trace[0]['line'];
-            $originalFilepath = $e->getFile();
-            $originalLine = $e->getLine();
-            include __APPLICATION_PATH.'errors/exception.php';
+            /* Inlcude config */
+            include __CONFIG_PATH.'config.php';
+            if($debugOn) {
+                /* Displays Exception in html DIV */
+                $trace = $e->getTrace();
+                $message = $e->getMessage();
+                $filepath = $trace[0]['file'];
+                $line = $trace[0]['line'];
+                $originalFilepath = $e->getFile();
+                $originalLine = $e->getLine();
+                include __APPLICATION_PATH.'errors/exception.php';
+            }
         }
     }
 
