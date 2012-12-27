@@ -47,6 +47,20 @@ if (!defined('__SITE_PATH')) exit('No direct script access allowed');
 class loader {
 
     /**
+     * __get
+     *
+     * Allows views to access Controller's loaded classes using the same
+     * syntax as controllers.
+     *
+     * @param   string
+     * @access private
+     */
+    function __get($key) {
+        $c = controller::get_instance();
+        return $c->$key;
+    }
+
+    /**
      *
      * _autoLoad
      * 
