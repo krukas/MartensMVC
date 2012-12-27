@@ -49,6 +49,8 @@ class database {
     private $stmt;
     private $where_field = null;
     private $where_value = null;
+    private $orderby_field = null;
+    private $orderby_sort = null;
 
     /**
      * Constructer
@@ -102,9 +104,49 @@ class database {
         return $this->stmt->fetchAll();
     }
 
+    /**
+     * Rest
+     *
+     * Reset the where and orderBy.
+     *
+     * @access  public
+     * @return  void
+     */
+    public function reset(){
+        $this->where_field = null;
+        $this->where_value = null;
+        $this->orderby_field = null;
+        $this->orderby_sort = null;
+    }
+
+    /**
+     * where
+     *
+     * Sets the where condition for the get, delete, update functions.
+     *
+     * @access  public
+     * @param   string  field
+     * @param   array   value
+     * @return  void
+     */
     public function where($field, $value) {
         $this->where_field = $field;
         $this->where_value = $value;
+    }
+
+    /**
+     * orderby
+     *
+     * Sets the order by for the get function.
+     *
+     * @access  public
+     * @param   string  mysql query
+     * @param   array   binds
+     * @return  void
+     */
+    public function orderBy($field, $sort = 'DESC'){
+        $this->orderby_field = $field;
+        $this->orderby_sort = $sort;
     }
 
     /**
@@ -123,9 +165,14 @@ class database {
         $whereBind = array();
 
         /* Add WHERE when $where_field and $where_value are set */
-        if ($this->where_field != null && $this->where_value != null) {
+        if (!empty($this->where_field) && !empty($this->where_value)) {
             $query .= " WHERE " . $this->where_field . " =  ? ";
             $whereBind[] = $this->where_value;
+        }
+
+        /* Add ORDER BY when $this->orderby_field and $this->orderby_sort are set */
+        if(!empty($this->orderby_field) && !empty($this->orderby_sort)){
+            $query .= " ORDER BY ".$this->orderby_field." ".$this->orderby_sort;
         }
 
         /* Add LIMIT when given in function */
