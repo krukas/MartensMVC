@@ -237,7 +237,7 @@ class session {
             }
             
         }
-        return false;
+        return null;
     }
 
 }
