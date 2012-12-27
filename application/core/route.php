@@ -97,9 +97,6 @@ class route {
         /* Create new controller and create uri */
         $controller = new $this->controller();
         $controller->uri = new uri($this->args);
-
-        /* Auto-load */
-        $controller->load->_autoLoad();
         
         /* check if the action is callable */
         if (!is_callable(array($controller, $this->action))) {
@@ -109,8 +106,11 @@ class route {
             $action = $this->action;
         }
 
-        /* Run action */
         try{
+            /* Auto-load */
+            $controller->load->_autoLoad();
+
+            /* Run action */
             $controller->$action();
         } catch(Exception $e){
             /* Displays Exception in html DIV */
