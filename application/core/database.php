@@ -165,7 +165,7 @@ class database {
         $whereBind = array();
 
         /* Add WHERE when $where_field and $where_value are set */
-        if (!empty($this->where_field) && !empty($this->where_value)) {
+        if (!empty($this->where_field)) {
             $query .= " WHERE " . $this->where_field . " =  ? ";
             $whereBind[] = $this->where_value;
         }
