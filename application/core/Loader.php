@@ -177,7 +177,22 @@ class Core_Loader {
      * @return  void
      *
      */
-    function view($file, $data = array()) {
+    function view($file, $data = array(), $autoloadViews = true) {
+        $loadConfig = __CONFIG_PATH. "config.php";
+        if (!is_file($loadConfig)){
+            throw new Exception("Could not load the config file!");
+        }
+        include $loadConfig;
+
+        /* Load header when set */
+        if($autoloadViews && !empty($autoloadHeaderView)){
+            $headerFile = __APPLICATION_PATH . 'views/' . $autoloadHeaderView . '.php';
+            if (!is_readable($headerFile)) {
+                throw new Exception("Auto load header view file not exists '" . $headerFile . "'");
+            }
+            include $headerFile;
+        }
+
         /* Set variables from array */
         foreach ($data as $key => $value) {
             $$key = $value;
@@ -187,6 +202,15 @@ class Core_Loader {
             throw new Exception("View file not exists '" . $file . "'");
         }
         include $file;
+
+        /* Load footer when set */
+        if($autoloadViews && !empty($autoloadFooterView)){
+            $footerFile = __APPLICATION_PATH . 'views/' . $autoloadFooterView . '.php';
+            if (!is_readable($footerFile)) {
+                throw new Exception("Auto load footer view file not exists '" . $footerFile . "'");
+            }
+            include $footerFile;
+        }
     }
 
 }

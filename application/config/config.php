@@ -32,6 +32,7 @@ $baseURL = 'https://192.168.2.210/MartensMVC/';
  */
 $debugOn = true;
 
+
 /* -------------------------------------------------------------------
  * Sessions save locations
  * -------------------------------------------------------------------
@@ -71,6 +72,27 @@ $autoload['libraries'] = array();
  *      $autoload['model'] = array('model1', 'model2');
  */
 $autoload['model'] = array();
+
+
+/* -------------------------------------------------------------------
+ * Auto-load Header view
+ * ------------------------------------------------------------------- 
+ * 
+ * This will autoload a view in the view folder, before the view is loaded  
+ *
+ */
+$autoloadHeaderView = "includes/header";
+
+
+/* -------------------------------------------------------------------
+ * Auto-load Footer view
+ * ------------------------------------------------------------------- 
+ * 
+ * This will autoload a view in the view folder, after the view is loaded  
+ *
+ */
+$autoloadFooterView = "includes/footer";
+
 
 /* End of file config.php */
 /* Location: ./application/config/config.php */
