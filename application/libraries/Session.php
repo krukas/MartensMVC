@@ -44,7 +44,7 @@ if (!defined('__SITE_PATH')) exit('No direct script access allowed');
  */
 // ------------------------------------------------------------------------
 
-class session {
+class Library_Session {
     /* @var array contains data of session. */
     private $data = array();
 

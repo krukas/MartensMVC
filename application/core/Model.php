@@ -44,7 +44,7 @@ if (!defined('__SITE_PATH')) exit('No direct script access allowed');
  */
 // ------------------------------------------------------------------------
 
-class model {
+class Core_Model {
 
     /**
      * __get
@@ -56,7 +56,7 @@ class model {
      * @access private
      */
     function __get($key) {
-        $c = controller::get_instance();
+        $c = Core_Controller::get_instance();
         return $c->$key;
     }
 

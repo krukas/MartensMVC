@@ -44,7 +44,7 @@ if (!defined('__SITE_PATH')) exit('No direct script access allowed');
  */
 // ------------------------------------------------------------------------
 
-class loader {
+class Core_Loader {
 
     /**
      * __get
@@ -56,7 +56,7 @@ class loader {
      * @access private
      */
     function __get($key) {
-        $c = controller::get_instance();
+        $c = Core_Controller::get_instance();
         return $c->$key;
     }
 
@@ -77,9 +77,9 @@ class loader {
 
             /* Load the libraries */
             if (isset($autoload['libraries']) && count($autoload['libraries']) > 0) {
-                if (in_array('database', $autoload['libraries'])) {
+                if (in_array('Database', $autoload['libraries'])) {
                     $this->database();
-                    $autoload['libraries'] = array_diff($autoload['libraries'], array('database'));
+                    $autoload['libraries'] = array_diff($autoload['libraries'], array('Database'));
                 }
 
                 // Load all other libraries
@@ -107,11 +107,11 @@ class loader {
      *
      */
     function database() {
-        load_class("database", "core");
-        if (isset(controller::get_instance()->db)) {
+        load_class("Database", "core");
+        if (isset(Core_Controller::get_instance()->db)) {
             throw new Exception("Database already loaded!");
         }
-        controller::get_instance()->db = new database();
+        Core_Controller::get_instance()->db = new Core_Database();
     }
 
     /**
@@ -125,17 +125,20 @@ class loader {
      *
      */
     function model($name) {
+        $varName    = 'Model'.$name;
+        $className  = 'Model_'.$name;
+
         if (!load_class($name, "models")) {
             throw new Exception("Model file not exists '" . $name . "'");
         }
-        if (!class_exists($name)) {
+        if (!class_exists($className)) {
             throw new Exception("Model class not exists '" . $name . "'");
         }
 
-        if (isset(controller::get_instance()->$name)) {
+        if (isset(Core_Controller::get_instance()->$varName)) {
             throw new Exception("Model already loaded '" . $name . "'");
         }
-        controller::get_instance()->$name = new $name();
+        Core_Controller::get_instance()->$varName = new $className();
     }
 
     /**
@@ -149,17 +152,20 @@ class loader {
      *
      */
     function library($name) {
+        $varName    = 'Lib'.$name;
+        $className  = 'Library_'.$name;
+
         if (!load_class($name, "libraries")) {
             throw new Exception("Library file not exists '" . $name . "'");
         }
-        if (!class_exists($name)) {
+        if (!class_exists($className)) {
             throw new Exception("Library class not exists '" . $name . "'");
         }
 
-        if (isset(controller::get_instance()->$name)) {
+        if (isset(Core_Controller::get_instance()->$varName)) {
             throw new Exception("Library already loaded '" . $name . "'");
         }
-        controller::get_instance()->$name = new $name();
+        Core_Controller::get_instance()->$varName = new $className();
     }
 
     /**

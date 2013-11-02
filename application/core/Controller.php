@@ -45,7 +45,7 @@ if (!defined('__SITE_PATH')) exit('No direct script access allowed');
 // ------------------------------------------------------------------------
 
 
-class controller {
+class Core_Controller {
 
     private static $instance = null;
 
@@ -55,8 +55,8 @@ class controller {
     public function __construct() {
         self::$instance = $this;
         /* Load loader */
-        load_class("loader", "core");
-        $this->load = new loader();
+        load_class("Loader", "core");
+        $this->load = new Core_Loader();
     }
 
     public static function get_instance() {

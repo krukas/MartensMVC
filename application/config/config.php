@@ -59,7 +59,7 @@ $defaultEmailName = 'MartensMCV';
  * Auto-load libraries
  * ------------------------------------------------------------------- 
  * Example:
- *      $autoload['libraries'] = array('databse', 'mail', 'upload');
+ *      $autoload['libraries'] = array('Databse', 'Mail', 'Upload');
  */
 $autoload['libraries'] = array();
 

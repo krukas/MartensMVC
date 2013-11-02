@@ -43,7 +43,7 @@ if (!defined('__SITE_PATH')) exit('No direct script access allowed');
  * @author		Maikel Martens
  */
 // ------------------------------------------------------------------------
-class mail {
+class Library_Mail {
     /* @var Array contains to email-addresses where email is send to. */
 
     private $to;

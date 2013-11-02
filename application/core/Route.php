@@ -44,16 +44,16 @@ if (!defined('__SITE_PATH')) exit('No direct script access allowed');
  */
 // ------------------------------------------------------------------------
 
-class route {
+class Core_Route {
     /* The controller path */
 
     private $path;
     /* The arguments */
     private $args = array();
-    /* The controller file path/file.php */
-    private $file;
     /* The controller name */
     private $controller = "";
+    /* The controller class name */
+    private $controllerClassName = "";
     /* The controller action */
     private $action = "index";
 
@@ -84,19 +84,18 @@ class route {
      *
      */
     function load() {
-        /* if file not exsist show error404 */
-        if (!is_readable($this->file)) {
+        /* load controller when not exsist show error404 */
+        if (!load_class($this->controller, 'controllers')) {
             include __APPLICATION_PATH.'errors/error404.php';
             return;
         }
 
-        /* load controller and uri */
-        load_class($this->controller, "controllers");
-        load_class('uri', 'core');
+        /* Load Core_Uri */
+        load_class('Uri', 'core');
 
         /* Create new controller and create uri */
-        $controller = new $this->controller();
-        $controller->uri = new uri($this->args);
+        $controller = new $this->controllerClassName();
+        $controller->uri = new Core_Uri($this->args);
         
         /* check if the action is callable */
         if (!is_callable(array($controller, $this->action))) {
@@ -145,14 +144,13 @@ class route {
 
         if (empty($_GET['url'])) {
             $this->controller = $defaultpage;
-            $this->action = "index";
         } else {
             if (isValidUrlData($_GET['url'])) {
                 /* get parts of route */
                 $parts = explode('/', $_GET['url']);
-                $this->controller = $parts[0];
+                $this->controller = ucfirst(strtolower($parts[0]));
                 /* Set action when set */
-                if (isset($parts[1]) && trim($parts[1]) != "") {
+                if (isset($parts[1]) && trim($parts[1]) != '') {
                     $this->action = $parts[1];
                 }
                 /* set arguments */
@@ -161,8 +159,7 @@ class route {
                 $this->controller = 'error404';
             }
         }
-        /* set the file path */
-        $this->file = $this->path . '/' . $this->controller . '.php';
+        $this->controllerClassName = 'Controller_'.$this->controller;
     }
 
     /**

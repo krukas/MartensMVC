@@ -11,7 +11,7 @@
   * Default page to load when non is set 
   * -------------------------------------------------------------------
   */
- $defaultpage = 'home';
+ $defaultpage = 'Home';
 
 /* End of file route.php */
 /* Location: ./application/config/route.php */

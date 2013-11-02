@@ -43,7 +43,7 @@ if (!defined('__SITE_PATH')) exit('No direct script access allowed');
  * @author		Maikel Martens
  */
 // ------------------------------------------------------------------------
-class paginate {
+class Library_Paginate {
     /* @var int contains total items. */
     private $itemsTotal;
     

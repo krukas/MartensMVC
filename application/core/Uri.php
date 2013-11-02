@@ -44,7 +44,7 @@ if (!defined('__SITE_PATH')) exit('No direct script access allowed');
  */
 // ------------------------------------------------------------------------
 
-class uri {
+class Core_Uri {
 
     private $segments;
     

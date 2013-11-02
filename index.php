@@ -33,10 +33,10 @@ define('__CONFIG_PATH', $config_path);
 include __APPLICATION_PATH . 'core/common.php';
 
 /* * * include the class route * * */
-load_class("route", "core");
+load_class("Route", "core");
 
 /* * * Load the route * * */
-$route = new route("controllers");
+$route = new Core_Route("controllers");
 
 /* * * Setup the controller * * */
 $route->getController();

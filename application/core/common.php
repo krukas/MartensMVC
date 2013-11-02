@@ -73,8 +73,8 @@ if (!function_exists('load_class')) {
     function load_class($class, $path = "libraries") {
         global $loaded_class;
         $file = __APPLICATION_PATH . $path . "/" . $class . ".php";
-        if (is_readable($file) && !in_array($class, $loaded_class)) {
-            $loaded_class[] = $class;
+        if (is_readable($file) && !in_array($path.$class, $loaded_class)) {
+            $loaded_class[] = $path.$class;
             include($file);
             return true;
         } else {
@@ -168,10 +168,10 @@ if ( ! function_exists('redirect')) {
 }
 
 /* load super class controller */
-load_class("controller", "core");
+load_class("Controller", "core");
 
 /* load super class model */
-load_class("model", "core");
+load_class("Model", "core");
 
 /* End of file common.php */
 /* Location: ./application/core/common.php */

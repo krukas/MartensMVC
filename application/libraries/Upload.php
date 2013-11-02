@@ -44,7 +44,7 @@ if (!defined('__SITE_PATH')) exit('No direct script access allowed');
  */
 // ------------------------------------------------------------------------
 
-class upload {
+class Library_Upload {
     /* @var String contains directory where the files should be uploaded. */
     private $uploadDirectory;
 

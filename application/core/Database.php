@@ -43,7 +43,7 @@ if (!defined('__SITE_PATH')) exit('No direct script access allowed');
  * @author      Maikel Martens
  */
 // ------------------------------------------------------------------------
-class database {
+class Core_Database {
 
     private $dbh;
     private $stmt;
