@@ -23,11 +23,11 @@ if (!defined('__SITE_PATH')) exit('No direct script access allowed');
  *
  * An MVC framework for PHP/MYSQL
  *
- * @author		Maikel Martens
+ * @author      Maikel Martens
  * @copyright           Copyright (c) 20012 - 2012, Martens.me.
- * @license		http://martens.me/license.html
- * @link		http://martens.me
- * @since		Version 1.0
+ * @license     http://martens.me/license.html
+ * @link        http://martens.me
+ * @since       Version 1.0
  * @filesource
  */
 // ------------------------------------------------------------------------
@@ -35,22 +35,27 @@ if (!defined('__SITE_PATH')) exit('No direct script access allowed');
 /**
  * Upload class
  *
- * Upload class for uploading multiple files.
+ * Upload class for uploading a file.
  *
- * @package		MartensMCV
+ * @package     MartensMCV
  * @subpackage          Libraries
  * @category            Libraries
- * @author		Maikel Martens
+ * @author      Maikel Martens
  */
 // ------------------------------------------------------------------------
 
 class upload {
     /* @var String contains directory where the files should be uploaded. */
-
     private $uploadDirectory;
 
-    /* @var array contains arrays with the information about the file. */
-    private $uploadedFiles = array();
+    /* @var array contains the information about the file. */
+    private $uploadedFile;
+
+    /* @var String contains the file path of the uploaded file. */
+    private $uploadedFilePath;
+
+    /* @var String contains the file name of the uploaded file. */
+    private $uploadedFileName;
 
     /* @var array contains allowed mimes. */
     private $allowedMimes;
@@ -73,8 +78,8 @@ class upload {
     /* @var int contains maximum height of image */
     private $maximumHeight;
 
-    /* @var array contains messages */
-    private $message = array();
+    /* @var array contains errors messages */
+    private $errors = array();
 
     /**
      * Constructer
@@ -84,8 +89,8 @@ class upload {
      * $message         array
      * $UploadedFiles   array
      *
-     * @access	public
-     * @return	void
+     * @access  public
+     * @return  void
      */
     function __construct() {
         /* Inlude allowed mimes */
@@ -93,26 +98,26 @@ class upload {
         $this->allowedMimes = $mimes;
 
         /* Set default options */
-        $this->addRandom = false;
+        $this->addRandom = true;
         $this->isImage = false;
         $this->validExtensions = '*';
         $this->setUploadDirectory('data/uploads');
     }
 
     /**
-     * RandomString
+     * getRandomString
      *
      * Creates an random string, used to add on files
      *
-     * @access	private
-     * @param	int     Length of the return string
-     * @return	String
+     * @access  private
+     * @param   int     Length of the return string
+     * @return  String
      */
-    private function randomString($length) {
+    private function getRandomString() {
         $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         $str = "";
         $size = strlen($chars);
-        for ($i = 0; $i < $length; $i++) {
+        for ($i = 0; $i < 8; $i++) {
             $str .= $chars[rand(0, $size - 1)];
         }
         return $str;
@@ -123,8 +128,8 @@ class upload {
      *
      * returns an array with valid file type mimes 
      *
-     * @access	private
-     * @return	array
+     * @access  private
+     * @return  array
      */
     private function getValidFileTypes() {
         $validFileTypes = array();
@@ -156,38 +161,31 @@ class upload {
     }
 
     /**
-     * validateExtensions
+     * validateExtension
      *
-     * Checks if the files match the given valid extension and file types, 
-     * when validExtensions not is set it wil return true;
+     * Checks if the file match the given valid extension and file types, 
+     * when validExtension not is set it wil return true;
      *
-     * @access	private
-     * @return	boolean
+     * @access  private
+     * @return  boolean
      */
-    private function validateExtensions() {
+    private function validateExtension() {
         if ($this->validExtensions != '*') {
-            $controle = true;
+            /* Get file extension */
+            $x = explode('.', $this->uploadedFile['name']);
+            $extension = strtolower( $x[count($x) - 1] );
 
-            /* loops to each file */
-            foreach ($this->uploadedFiles as $key => $file) {
-                /* Get file extension */
-                $x = explode('.', $file['name']);
-                $extension = $x[count($x) - 1];
+            /* Get file type */
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $type = finfo_file($finfo, $this->uploadedFile['tmp_name']);
 
-                /* Get file type */
-                $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                $type = finfo_file($finfo, $file['tmp_name']);
+            $extensions = explode('|', $this->validExtensions);
 
-                $extensions = explode('|', $this->validExtensions);
-
-                /* When it's not a valid extension or file create message */
-                if (!in_array($extension, $extensions) || !in_array($type, $this->getValidFileTypes())) {
-                    $this->uploadedFiles[$key]['validate'] = false;
-                    $controle = false;
-                    $this->message[] = "Error for file \"" . $file['name'] . "\" file type is not allowed!";
-                }
+            /* When it's not a valid extension or file create message */
+            if (!in_array($extension, $extensions) || !in_array($type, $this->getValidFileTypes())) {
+                $this->errors[] = "File type is not allowed!";
+                return false;
             }
-            return $controle;
         }
         return true;
     }
@@ -198,22 +196,17 @@ class upload {
      * Checks if the files are not biger then given maximumFileSize, when maximumFileSize
      * not is set it wil return true;
      *
-     * @access	private
-     * @return	boolean
+     * @access  private
+     * @return  boolean
      */
     private function validateSize() {
         if (!empty($this->maximumFileSize)) {
-            $controle = true;
-            foreach ($this->uploadedFiles as $key => $file) {
-                if ($file['size'] > $this->maximumFileSize) {
-                    $this->uploadedFiles[$key]['validate'] = false;
-                    $controle = false;
-                    $size = (int) ($file['size'] / 100);
-                    $this->message[] = "Error for file \"" . $file['name'] . "\" is too big. It must be less than "
-                            . $this->maximumFileSize / 1000 . " kB and it is " . ($size / 10) . " kB.";
-                }
+            if ($this->uploadedFile['size'] > $this->maximumFileSize) {
+                $size = (int) ($this->uploadedFile['size'] / 1000);
+                $this->errors[] = "File is too big. It must be less than "
+                        . $this->maximumFileSize / 1000 . " kB and it is " . $size . " kB.";
+                return false;
             }
-            return $controle;
         }
         return true;
     }
@@ -224,53 +217,49 @@ class upload {
      * Checks if the files are images and not biger then given maximumWidth and
      * maximumHeight.
      *
-     * @access	private
-     * @return	boolean
+     * @access  private
+     * @return  boolean
      */
     private function validateImages() {
         if ($this->isImage) {
             $controle = true;
 
-            /* loops to each file */
-            foreach ($this->uploadedFiles as $key => $file) {
-                $imageDate = getimagesize($file['tmp_name']);
+            $imageDate = getimagesize($this->uploadedFile['tmp_name']);
 
-                /* Validate if file is a image */
-                if ($imageDate !== false && ($imageDate['mime'] == "image/png" || $imageDate['mime'] == "image/jpeg" || $imageDate['mime'] == "image/jpeg")) {
+            /* Validate if file is a image */
+            if ($imageDate !== false && ($imageDate['mime'] == "image/png" || $imageDate['mime'] == "image/jpeg" || $imageDate['mime'] == "image/jpeg")) {
 
-                    /* Validate size of the image  */
-                    if ($imageDate [0] > $this->maximumWidth) {
-                        $this->uploadedFiles[$key]['validate'] = false;
-                        $controle = false;
-                        $this->message[] = "Error for file \"" . $file['name'] . "\" exceeds the maximum width " . $this->maximumWidth . ".";
-                    }
-                    if ($imageDate [1] > $this->maximumHeight) {
-                        $this->uploadedFiles[$key]['validate'] = false;
-                        $controle = false;
-                        $this->message[] = "Error for file \"" . $file['name'] . "\" exceeds the maximum height " . $this->maximumHeight . ".";
-                    }
-                } else {
-                    $this->uploadedFiles[$key]['validate'] = false;
+                /* Validate size of the image  */
+                if ($imageDate [0] > $this->maximumWidth) {
                     $controle = false;
-                    $this->message[] = "Error for file \"" . $file['name'] . "\" is not a valid image!";
+                    $this->errors[] = "Image exceeds the maximum width of " . $this->maximumWidth . "px.";
                 }
+                if ($imageDate [1] > $this->maximumHeight) {
+                    $controle = false;
+                    $this->errors[] = "Image exceeds the maximum height of " . $this->maximumHeight . "px.";
+                }
+            } else {
+                $controle = false;
+                $this->errors[] = "File is not a valid image!";
             }
-            return $controle;
+        
+        return $controle;
         }
         return true;
     }
 
     /**
-     * uploadFiles
+     * uploadFile
      *
-     * Upload files gives boolean when one file gives a error message.
+     * Upload file gives boolean when file gives a error message.
      *
-     * @access	public
-     * @return	boolean
+     * @access  public
+     * @return  boolean
      */
-    public function uploadFiles() {
-        if (empty($this->uploadedFiles)) {
-            $this->message[] = "No files are uploaded";
+    public function uploadFile() {
+        $file = $this->uploadedFile;
+        if (!is_uploaded_file($file['tmp_name'])) {
+            $this->errors[] = "No file uploaded";
             return false;
         }
         $controle = true;
@@ -281,7 +270,7 @@ class upload {
         }
 
         /* Validate the file extenions */
-        if (!$this->validateExtensions()) {
+        if (!$this->validateExtension()) {
             $controle = false;
         }
 
@@ -291,39 +280,31 @@ class upload {
         }
 
         /* move files to uploadDirectory */
-        foreach ($this->uploadedFiles as $key => $file) {
-            if ($file['validate']) {
+        if ($controle) {
 
-                /* Add random string to file when addRandom is set to true */
-                if ($this->addRandom) {
-                    $fileDestination = $this->uploadDirectory . '/' . $this->randomString(10) . "_" . $file['name'];
-                } else {
-                    $fileDestination = $this->uploadDirectory . '/' . $file['name'];
-                }
+            /* Add random string to file when addRandom is set to true */
+            $randStr = $this->addRandom ? $this->getRandomString().'_' : '';
+            $fileDestination = $this->uploadDirectory . '/' . $randStr . str_replace(' ', '_', $file['name']);
 
-                /* Validate if file not already exists */
-                while (file_exists($fileDestination)) {
-                    $fileDestination = $this->uploadDirectory . '/' . $this->randomString(10) . "_" . $file['name'];
+            /* Validate if file not already exists */
+            if($this->addRandom) {
+                while (file_exists($fileDestination)) 
+                    $fileDestination = $this->uploadDirectory . '/' . $this->randomString(10) . "_" . str_replace(' ', '_', $file['name']);
+            } else {
+                if(file_exists($fileDestination)){
+                    $this->errors[] = "There is already a file uploaded named ".$file['name'];
+                    return false;
                 }
+            }
 
-                /* Validate if file is uploaded and move the file */
-                if (is_uploaded_file($file['tmp_name'])) {
-                    if (!move_uploaded_file($file['tmp_name'], $fileDestination)) {
-                        $this->uploadedFiles[$key]['validate'] = false;
-                        $this->message[] = "Error for file \"" . $file['name'] . "\" was not uploaded!";
-                        $controle = false;
-                    } else {
-                        $name = explode('/', $fileDestination);
-                        $this->uploadedFiles[$key]['uploaded'] = true;
-                        $this->uploadedFiles[$key]['location'] = $fileDestination;
-                        $this->uploadedFiles[$key]['name'] = $name[count($name) - 1];
-                        $this->message[] = $file['name'] . " is successfully uploaded!";
-                    }
-                } else {
-                    $this->uploadedFiles[$key]['validate'] = false;
-                    $this->message[] = "Error for file \"" . $file['name'] . "\" is not an uploaded file!";
-                    $controle = false;
-                }
+            /* move the file */
+            if (!move_uploaded_file($file['tmp_name'], $fileDestination)) {
+                $this->errors[] = "File could not be uploaded!";
+                $controle = false;
+            } else {
+                $name = explode('/', $fileDestination);
+                $this->uploadedFilePath = $fileDestination;
+                $this->uploadedFileName = $name[count($name) - 1];
             }
         }
         return $controle;
@@ -335,18 +316,17 @@ class upload {
      * Load a single file in class throws Exception if not all the array field 
      * are set or when no array is given
      *
-     * @access	public
+     * @access  public
      * @param   array   
-     * @return	void
+     * @return  void
      */
     public function loadFile($file) {
         if (is_array($file)) {
             if (isset($file['name']) && isset($file['type']) && isset($file['tmp_name']) && isset($file['size'])) {
-                if ($file['size'] != 0) {
-                    $file['validate'] = true;
-                    $file['uploaded'] = false;
-                    $this->uploadedFiles[] = $file;
-                }
+                $this->errors = array();
+                $this->uploadedFilePath = '';
+                $this->uploadedFileName = '';
+                $this->uploadedFile = $file;
             } else {
                 throw new Exception("Not evrything is set in array in loadFile!");
             }
@@ -356,31 +336,13 @@ class upload {
     }
 
     /**
-     * Loadfiles
-     *
-     * Load all files that are in $_FILES in the class.
-     *
-     * @access	public   
-     * @return	void
-     */
-    public function loadFiles() {
-        foreach ($_FILES as $key => $file) {
-            if ($file['size'] != 0) {
-                $this->uploadedFiles[$key] = $file;
-                $this->uploadedFiles[$key]['validate'] = true;
-                $this->uploadedFiles[$key]['uploaded'] = false;
-            }
-        }
-    }
-
-    /**
      * setUploadDirectory
      *
      * Set the directory path from __SITE_PATH, throws Exception when not valid directory is given.
      *
-     * @access	public
+     * @access  public
      * @param   String  path  
-     * @return	void
+     * @return  void
      */
     public function setUploadDirectory($path) {
         $path = realpath(__SITE_PATH . $path).'/';
@@ -396,9 +358,9 @@ class upload {
      *
      * Set the maximum file size in kB, throws Exception when no int is given.
      *
-     * @access	public
+     * @access  public
      * @param   int     size  
-     * @return	void
+     * @return  void
      */
     public function setMaximumFileSize($size) {
         if (is_numeric($size)) {
@@ -414,9 +376,9 @@ class upload {
      * Set the valid extensions in a string separated by | 
      * throws Exception when no String is given.
      *
-     * @access	public
+     * @access  public
      * @param   String    Extensions  
-     * @return	void
+     * @return  void
      */
     public function setValidExtensions($extensions) {
         if (is_string($extensions)) {
@@ -432,9 +394,9 @@ class upload {
      * Set the isImage boolean
      * throws Exception when no boolean is given.
      *
-     * @access	public
+     * @access  public
      * @param   boolean     boolean
-     * @return	void
+     * @return  void
      */
     public function setIsImage($boolean) {
         if (is_bool($boolean)) {
@@ -451,9 +413,9 @@ class upload {
      * also will add random string.
      * throws Exception when no boolean is given.
      *
-     * @access	public
+     * @access  public
      * @param   boolean     boolean
-     * @return	void
+     * @return  void
      */
     public function setAddRandomString($boolean) {
         if (is_bool($boolean)) {
@@ -469,9 +431,9 @@ class upload {
      * Set the maximum width for images
      * throws Exception when no int is given.
      *
-     * @access	public
+     * @access  public
      * @param   int     width
-     * @return	void
+     * @return  void
      */
     public function setMaximumWidth($width) {
         if (is_numeric($width)) {
@@ -487,9 +449,9 @@ class upload {
      * Set the maximum height for images
      * throws Exception when no int is given.
      *
-     * @access	public
+     * @access  public
      * @param   int     height
-     * @return	void
+     * @return  void
      */
     public function setMaximumHeight($height) {
         if (is_numeric($height)) {
@@ -500,37 +462,42 @@ class upload {
     }
 
     /**
-     * getMessages
+     * getErrors
      *
-     * Get messages, returns array when there are no messages it wil return a
+     * Get error messages, returns array when there are no messages it wil return a
      * empty array.
      *
-     * @access	public
-     * @return	array
+     * @access  public
+     * @return  array
      */
-    public function getMessages() {
-        return $this->message;
+    public function getErrors() {
+        return $this->errors;
     }
 
     /**
-     * getSuccessfullUploudedFiles
+     * getFilePath
      *
-     * Get the succesfull uplouded files.
-     * returns array with the file orginal name as value and the location as key
+     * Get the filepath where the uploaded file is moved to
      *
-     * @access	public
-     * @return	array
+     * @access  public
+     * @return  String
      */
-    public function getSuccessfullUploudedFiles() {
-        $successfullUplouds = array();
-        foreach ($this->uploadedFiles as $file) {
-            if ($file['uploaded']) {
-                $successfullUplouds[$file['location']] = $file['name'];
-            }
-        }
-        return $successfullUplouds;
+    public function getFilePath(){
+        return $this->uploadedFilePath;
     }
 
+    /**
+     * getFileName
+     *
+     * Get the filename of the moved uplouded file.
+     *
+     * @access  public
+     * @return  String
+     */
+    public function getFileName(){
+        return $this->uploadedFileName;
+
+    }
 }
 /* End of file upload.php */
 /* Location: ./application/libraries/upload.php */
