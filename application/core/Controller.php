@@ -49,6 +49,10 @@ class Core_Controller {
 
     private static $instance = null;
 
+    public $__name__;
+
+    public $__action__;
+
     /**
      * Constructor
      */
